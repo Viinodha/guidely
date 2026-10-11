@@ -1,0 +1,6 @@
+{
+  "name": "Margadarshak AI - Indian Student Career & Education Pathfinder",
+  "description": "Personalized career and education advisor for Indian school and college students with explainable hybrid AI recommendations, entrance exam roadmaps, and cross-device sync.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

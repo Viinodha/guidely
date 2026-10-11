@@ -1,0 +1,112 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *, .dark, .dark *));
+
+@layer base {
+  :root {
+    /* Highly readable, warm cream & crisp charcoal editorial palette */
+    --bg-primary: #fbf9f5;
+    --bg-secondary: #f3ece0;
+    --bg-card: #ffffff;
+    --border-subtle: #dfd5c7;
+    --border-highlight: #b85d24;
+    --text-primary: #14110f;
+    --text-secondary: #3b342e;
+    --text-muted: #665b50;
+    --accent: #b85d24;
+    --accent-hover: #9c4c19;
+    --accent-subtle: #faefe4;
+    --accent-glow: rgba(184, 93, 36, 0.16);
+    --card-shadow: 0 4px 20px -2px rgba(40, 30, 20, 0.06), 0 1px 3px rgba(40, 30, 20, 0.04);
+  }
+
+  [data-theme="dark"],
+  .dark,
+  html.dark {
+    /* Warm Espresso & Night Cream Palette */
+    --bg-primary: #141211;
+    --bg-secondary: #1a1716;
+    --bg-card: #211e1c;
+    --border-subtle: #38312b;
+    --border-highlight: #d9824c;
+    --text-primary: #faf5ec;
+    --text-secondary: #cfc5b6;
+    --text-muted: #8c8275;
+    --accent: #d9824c;
+    --accent-hover: #e89560;
+    --accent-subtle: rgba(217, 130, 76, 0.15);
+    --accent-glow: rgba(217, 130, 76, 0.22);
+    --card-shadow: 0 10px 30px -4px rgba(0, 0, 0, 0.35);
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: background-color 0.2s ease, color 0.2s ease;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, .font-display {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+  }
+}
+
+/* Accessible focus styling */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* Airy, crisp card styling */
+.airy-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 1.25rem;
+  box-shadow: var(--card-shadow);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.airy-card-hover:hover {
+  border-color: var(--border-highlight);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px -4px rgba(45, 35, 25, 0.09);
+}
+
+/* Subtle custom scrollbar */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-subtle);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Universal legibility guarantee: Any element with a black or dark background MUST have white text */
+.bg-black,
+[class*="bg-black"],
+.bg-neutral-900,
+.bg-neutral-950,
+.bg-stone-900,
+.bg-stone-950,
+.bg-zinc-900,
+.bg-zinc-950 {
+  color: #ffffff;
+}
+
+[data-theme="dark"] pre,
+.dark pre {
+  color: #faf5ec;
+}
+
