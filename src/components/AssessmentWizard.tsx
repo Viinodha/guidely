@@ -139,7 +139,7 @@ export const AssessmentWizard: React.FC<AssessmentWizardProps> = ({
               {currentStep === 3 && 'Aspirations & Practical Realities'}
             </h1>
             <p className="text-sm text-[var(--text-secondary)]">
-              {currentStep === 1 && 'Guidley customizes every recommendation based on whether you are navigating school boards or college placements.'}
+              {currentStep === 1 && 'Guidely customizes every recommendation based on whether you are navigating school boards or college placements.'}
               {currentStep === 2 && 'Share your primary stream, academic scores, and the topics you genuinely find stimulating.'}
               {currentStep === 3 && 'Help us ground advice in your financial preferences, preferred cities, and exam readiness.'}
             </p>

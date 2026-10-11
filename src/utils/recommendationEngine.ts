@@ -347,7 +347,7 @@ export function calculateCareerMatches(profile: StudentProfile): ScoredCareer[] 
     const calculationEquation = `${Math.max(streamPts, 0)} (Stream) + ${finalSubjectScore} (Subjects) + ${academicPts} (Academic) + ${finalWorkStyleScore} (Work Style) + ${finalBudgetGoalScore} (Goals & Track) = ${finalScore}% Match`;
 
     const scoreExplanation = isEligible
-      ? `How Guidley calculated ${finalScore}%: You earned ${Math.max(streamPts, 0)}/35 pts for Stream qualification (${streamRationale}), ${finalSubjectScore}/25 pts for Subject affinity (${subjectRationale}), ${academicPts}/15 pts for Academic benchmark (${academicRationale}), ${finalWorkStyleScore}/15 pts for Work style fit (${workStyleRationale}), and ${finalBudgetGoalScore}/10 pts for ${userType === 'college' ? (collegeGoal === 'placements' ? 'Career/Placement Track' : 'Higher Education Track') : 'Audience Goals'} (${budgetGoalRationale}). Total confidence index: ${finalScore}%.`
+      ? `How Guidely calculated ${finalScore}%: You earned ${Math.max(streamPts, 0)}/35 pts for Stream qualification (${streamRationale}), ${finalSubjectScore}/25 pts for Subject affinity (${subjectRationale}), ${academicPts}/15 pts for Academic benchmark (${academicRationale}), ${finalWorkStyleScore}/15 pts for Work style fit (${workStyleRationale}), and ${finalBudgetGoalScore}/10 pts for ${userType === 'college' ? (collegeGoal === 'placements' ? 'Career/Placement Track' : 'Higher Education Track') : 'Audience Goals'} (${budgetGoalRationale}). Total confidence index: ${finalScore}%.`
       : `Why this is ${finalScore}% (Ineligible): This pathway received 0 pts for stream compatibility due to statutory educational prerequisites: ${streamRationale}.`;
 
     const scoreBreakdown: ExplainableScoreBreakdown = {
@@ -516,7 +516,7 @@ function buildDeterministicRationale(
     personalizedNextSteps = [
       `Download official syllabus and 5 years of past solved question papers for ${career.keyExams[0]?.name || 'key entrance exam'} from ${career.keyExams[0]?.officialPortal || 'the official portal'}.`,
       `Commit a weekly study block of 14-18 focused hours dedicated to ${career.criticalSkills.slice(0, 2).join(' and ')}.`,
-      `Bookmark this career in Guidley and follow the interactive 3-stage milestone checklist.`,
+      `Bookmark this career in Guidely and follow the interactive 3-stage milestone checklist.`,
     ];
   } else if (collegeGoal === 'placements' && placementKit) {
     // APPEND PLACEMENT PREPARATION RESOURCES INTO PERSONALIZED STEPS

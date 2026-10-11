@@ -76,7 +76,7 @@ export default function App() {
       <div className="min-h-screen flex items-center justify-center bg-[#faf7f2] text-[#c76f3b]">
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-2 border-[#c76f3b] border-t-transparent rounded-full animate-spin" />
-          <span className="text-xs font-semibold tracking-wider uppercase text-[var(--text-muted)]">Loading Guidley...</span>
+          <span className="text-xs font-semibold tracking-wider uppercase text-[var(--text-muted)]">Loading Guidely...</span>
         </div>
       </div>
     );
@@ -159,7 +159,7 @@ export default function App() {
       <footer className="border-t border-[var(--border-subtle)] py-10 text-center text-xs text-[var(--text-muted)] bg-[var(--bg-primary)]">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="font-medium text-[var(--text-secondary)]">
-            Guidley · Thoughtful Career & Education Guidance for Indian Students
+            Guidely · Thoughtful Career & Education Guidance for Indian Students
           </p>
           <div className="flex items-center gap-4 text-[11px] text-[var(--text-muted)]">
             <span>NIRF Aligned</span>

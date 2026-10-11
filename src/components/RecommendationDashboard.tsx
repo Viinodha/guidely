@@ -528,13 +528,13 @@ export const RecommendationDashboard: React.FC<RecommendationDashboardProps> = (
                         {isBookmarked ? <BookmarkCheck className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
                       </button>
 
-                      {/* Ask Guidley Contextual Advisor */}
+                      {/* Ask Guidely Contextual Advisor */}
                       <button
                         onClick={() => onOpenAdvisorForCareer(career)}
                         className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] bg-[#f7f1e7] dark:bg-[#231f1c] hover:bg-[#ece2d3] text-[var(--text-primary)] text-xs font-semibold transition-all cursor-pointer"
                       >
                         <MessageSquareText className="w-4 h-4 text-[#b85d24]" />
-                        <span>Ask Guidley</span>
+                        <span>Ask Guidely</span>
                       </button>
 
                       {/* Expand / Collapse Rationale Button */}
@@ -764,7 +764,7 @@ export const RecommendationDashboard: React.FC<RecommendationDashboardProps> = (
                               className="flex items-center gap-2 text-xs text-[#b85d24] hover:text-[#994715] font-semibold disabled:opacity-50 cursor-pointer"
                             >
                               <Sparkles className={`w-3.5 h-3.5 ${isSynthesizing ? 'animate-spin' : ''}`} />
-                              <span>{isSynthesizing ? 'Synthesizing with Guidley AI...' : 'Refresh Mentor Analysis'}</span>
+                              <span>{isSynthesizing ? 'Synthesizing with Guidely AI...' : 'Refresh Mentor Analysis'}</span>
                             </button>
                           </div>
 

@@ -115,7 +115,7 @@ export const CloudSyncModal: React.FC<CloudSyncModalProps> = ({
         {/* Sync Code Box */}
         <div className="p-6 rounded-2xl bg-[#f8f3eb] dark:bg-[#1a1715] border border-[var(--border-subtle)] space-y-3">
           <span className="text-xs text-[var(--text-muted)] block font-medium">
-            Your Unique Guidley Sync Code
+            Your Unique Guidely Sync Code
           </span>
           <div className="flex items-center justify-between">
             <span className="font-display font-bold text-2xl tracking-wider text-[#c76f3b]">

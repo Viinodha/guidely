@@ -48,7 +48,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             onClick={() => setCurrentTab('dashboard')}
             className="flex items-center gap-3.5 text-left group focus:outline-none"
-            aria-label="Guidley Home"
+            aria-label="Guidely Home"
           >
             <div className="w-11 h-11 rounded-2xl bg-[#f2e9dc] dark:bg-[#2b2622] text-[#c76f3b] border border-[#e2d5c3] dark:border-[#3e3731] flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
               <Compass className="w-5 h-5 stroke-[2.2]" />
@@ -56,7 +56,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-display font-bold text-xl tracking-tight text-[var(--text-primary)]">
-                  Guidley
+                  Guidely
                 </span>
                 <span className="text-[11px] font-medium tracking-wide px-2 py-0.5 rounded-full bg-[#f4ebe1] dark:bg-[#2c2621] text-[#b3602d] dark:text-[#e08953] border border-[#ebdccf] dark:border-[#3d342d]">
                   Advisor
@@ -173,14 +173,14 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
           </div>
 
-          {/* Ask Guidley AI Trigger - Muted Terracotta Button */}
+          {/* Ask Guidely AI Trigger - Muted Terracotta Button */}
           <button
             onClick={onOpenChat}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#c76f3b] hover:bg-[#b56130] text-white font-medium text-xs shadow-sm transition-transform active:scale-95"
-            aria-label="Ask Guidley AI Advisor"
+            aria-label="Ask Guidely AI Advisor"
           >
             <MessageSquareText className="w-4 h-4" />
-            <span className="hidden sm:inline">Ask Guidley</span>
+            <span className="hidden sm:inline">Ask Guidely</span>
           </button>
         </div>
       </div>

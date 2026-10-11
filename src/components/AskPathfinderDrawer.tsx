@@ -141,7 +141,7 @@ export const AskPathfinderDrawer: React.FC<AskPathfinderDrawerProps> = ({
     setSelectedContext(activeCareer);
   }, [activeCareer]);
 
-  const storageKey = `guidley_counseling_chat_${selectedContext ? selectedContext.id : 'general'}`;
+  const storageKey = `guidely_counseling_chat_${selectedContext ? selectedContext.id : 'general'}`;
 
   // Initialize or restore chat when selectedContext changes
   useEffect(() => {
@@ -150,7 +150,11 @@ export const AskPathfinderDrawer: React.FC<AskPathfinderDrawerProps> = ({
       const cached = sessionStorage.getItem(storageKey);
       if (cached) {
         const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 0) {
+        // Ensure stale canned messages from older versions are not restored
+        const isStaleFallback = Array.isArray(parsed) && parsed.some((m) => 
+          typeof m.content === 'string' && m.content.includes('Strategic Priority: Master foundational syllabus chapters')
+        );
+        if (Array.isArray(parsed) && parsed.length > 0 && !isStaleFallback) {
           setMessages(parsed);
           return;
         }
@@ -164,7 +168,7 @@ export const AskPathfinderDrawer: React.FC<AskPathfinderDrawerProps> = ({
         {
           id: 'welcome-msg',
           role: 'assistant',
-          content: `Hello ${profile.studentName || 'Student'}! I am Guidley, your educational advisor.\n\nWe are actively analyzing **${selectedContext.title}**. With your background in **${profile.streamOrMajor}** and academic score of **${profile.academicScore}${profile.academicScoreType === 'cgpa' ? ' CGPA' : '%'}**, ask me anything about:\n• Official national entrance exams (${selectedContext.keyExams.map((e) => e.name).join(', ')})\n• Real category cutoffs & NIRF Tier-1 colleges\n• 6-month revision strategy & syllabus priorities`,
+          content: `Hello ${profile.studentName || 'Student'}! I am Guidely, your educational advisor.\n\nWe are actively analyzing **${selectedContext.title}**. With your background in **${profile.streamOrMajor}** and academic score of **${profile.academicScore}${profile.academicScoreType === 'cgpa' ? ' CGPA' : '%'}**, ask me anything about:\n• Official national entrance exams (${selectedContext.keyExams.map((e) => e.name).join(', ')})\n• Real category cutoffs & NIRF Tier-1 colleges\n• 6-month revision strategy & syllabus priorities`,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           followUps: [
             `What is a realistic cutoff rank in ${selectedContext.keyExams[0]?.name || 'the entrance exam'}?`,
@@ -178,7 +182,7 @@ export const AskPathfinderDrawer: React.FC<AskPathfinderDrawerProps> = ({
         {
           id: 'welcome-msg-gen',
           role: 'assistant',
-          content: `Hello ${profile.studentName || 'Student'}! I am Guidley, your advisor.\n\nI can help you navigate Indian stream selection, board exam vs entrance balancing, admission counseling procedures (JoSAA/MCC), state quotas, and national scholarships. What would you like to explore?`,
+          content: `Hello ${profile.studentName || 'Student'}! I am Guidely, your advisor.\n\nI can help you navigate Indian stream selection, board exam vs entrance balancing, admission counseling procedures (JoSAA/MCC), state quotas, and national scholarships. What would you like to explore?`,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           followUps: [
             profile.userType === 'school'
@@ -307,11 +311,11 @@ export const AskPathfinderDrawer: React.FC<AskPathfinderDrawerProps> = ({
   const handleExportTranscript = () => {
     if (messages.length === 0) return;
     const formattedTranscript = messages.map((m) => {
-      const speaker = m.role === 'user' ? 'Student' : 'Guidley Advisor';
+      const speaker = m.role === 'user' ? 'Student' : 'Guidely Advisor';
       return `### ${speaker} (${m.timestamp})\n\n${m.content}\n`;
     }).join('\n---\n\n');
 
-    const header = `# Guidley Advisor — Counseling Transcript\n` +
+    const header = `# Guidely Advisor — Counseling Transcript\n` +
       `**Student Stream**: ${profile.streamOrMajor}\n` +
       `**Active Career**: ${selectedContext?.title || 'General Advising'}\n` +
       `**Exported At**: ${new Date().toLocaleString()}\n\n---\n\n`;
@@ -320,7 +324,7 @@ export const AskPathfinderDrawer: React.FC<AskPathfinderDrawerProps> = ({
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `Guidley_Counseling_Notes_${new Date().toISOString().slice(0, 10)}.md`;
+    link.download = `Guidely_Counseling_Notes_${new Date().toISOString().slice(0, 10)}.md`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -396,32 +400,35 @@ export const AskPathfinderDrawer: React.FC<AskPathfinderDrawerProps> = ({
         if (done) break;
 
         buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n\n');
-        buffer = lines.pop() || '';
+        const events = buffer.split('\n\n');
+        buffer = events.pop() || '';
 
-        for (const line of lines) {
-          const trimmedLine = line.trim();
-          if (trimmedLine.startsWith('data:')) {
-            const dataStr = trimmedLine.replace(/^data:\s*/, '').trim();
-            if (dataStr === '[DONE]') {
-              continue;
-            }
-            try {
-              const parsed = JSON.parse(dataStr);
-              if (parsed.text) {
-                accumulatedRawText += parsed.text;
-                const { cleanText } = parseSuggestions(accumulatedRawText);
-
-                setMessages((prev) =>
-                  prev.map((m) =>
-                    m.id === assistantMsgId
-                      ? { ...m, content: cleanText || accumulatedRawText }
-                      : m
-                  )
-                );
+        for (const event of events) {
+          const lines = event.split('\n');
+          for (const line of lines) {
+            const trimmedLine = line.trim();
+            if (trimmedLine.startsWith('data:')) {
+              const dataStr = trimmedLine.replace(/^data:\s*/, '').trim();
+              if (dataStr === '[DONE]') {
+                continue;
               }
-            } catch {
-              // Ignore non-json pulse
+              try {
+                const parsed = JSON.parse(dataStr);
+                if (parsed.text) {
+                  accumulatedRawText += parsed.text;
+                  const { cleanText } = parseSuggestions(accumulatedRawText);
+
+                  setMessages((prev) =>
+                    prev.map((m) =>
+                      m.id === assistantMsgId
+                        ? { ...m, content: cleanText || accumulatedRawText }
+                        : m
+                    )
+                  );
+                }
+              } catch {
+                // Ignore non-json pulse
+              }
             }
           }
         }
@@ -478,16 +485,29 @@ export const AskPathfinderDrawer: React.FC<AskPathfinderDrawerProps> = ({
         );
       } catch (fallbackErr) {
         console.error('All chat attempts failed:', fallbackErr);
+        // Topic-aware client fallback
+        const lowerQ = prompt.toLowerCase();
+        let fallbackTopic = `Regarding your query "${prompt}":\n\n• **Strategic Priority**: Master foundational syllabus chapters and solve at least 5 years of Previous Year Questions (PYQs).\n• **Mock Test Routine**: Dedicate weekend mornings to full-length timed tests.\n• **Admissions Safety**: Track official notification schedules on state counseling and national test agency portals.`;
+        let fallbackFollowUps = ['What are the official registration dates?', 'What are the safe cutoffs for premier Tier 1 colleges?'];
+
+        if (lowerQ.includes('neet') || lowerQ.includes('mbbs') || lowerQ.includes('doctor')) {
+          fallbackTopic = `Regarding **NEET-UG & Medical Pathways**:\n\n• **Exam Authority & Structure**: NTA conducts NEET-UG annually for MBBS, BDS, and AYUSH seats. Total 720 marks (180 questions) covering Physics, Chemistry, and Biology.\n• **NCERT Supremacy**: Line-by-line mastery of Class 11 & 12 Biology NCERT accounts for 360 marks.\n• **Safe Benchmark**: GMC All India Quota seats generally close around 620-650+ depending on category.`;
+          fallbackFollowUps = ['What are the high-weightage chapters in NEET Biology?', 'How does 15% AIQ counseling work on the MCC portal?'];
+        } else if (lowerQ.includes('ca') || lowerQ.includes('chartered') || (lowerQ.includes('math') && lowerQ.includes('commerce'))) {
+          fallbackTopic = `Regarding **Chartered Accountancy (CA) without Math**:\n\n• **Math Prerequisite**: You DO NOT need Class 12 Mathematics to register for CA Foundation. Any stream student is eligible.\n• **Foundation Paper 3**: Quantitative Aptitude tests Class 10 arithmetic (Business Math, Logical Reasoning, and Statistics).\n• **Progression**: Clear Foundation -> Intermediate (Group 1 & 2) -> 2-year practical Articleship -> CA Final.`;
+          fallbackFollowUps = ['How do I prepare for Quantitative Aptitude without 12th Math?', 'What is the Direct Entry route for graduates?'];
+        } else if (lowerQ.includes('jee') || lowerQ.includes('iit') || lowerQ.includes('nit')) {
+          fallbackTopic = `Regarding **JEE Main & Advanced Pathways**:\n\n• **Exam Structure**: NTA JEE Main (300 marks) serves as entrance for NITs/IIITs and screening test for the top 2.5 lakh candidates taking JEE Advanced for IITs.\n• **Board Eligibility**: Minimum 75% aggregate in Class 12 (65% for SC/ST) or top 20 percentile.\n• **Counseling**: Centralized counseling is run through JoSAA across 6 rounds.`;
+          fallbackFollowUps = ['What percentile is needed for Computer Science in top NITs?', 'How do Home State quotas work in JoSAA?'];
+        }
+
         setMessages((prev) =>
           prev.map((m) =>
             m.id === assistantMsgId
               ? {
                   ...m,
-                  content: `Regarding **${selectedContext?.title || 'your chosen pathway'}**:\n\n• **Strategic Priority**: Master foundational syllabus chapters and solve at least 5 years of Previous Year Questions (PYQs).\n• **Mock Test Routine**: Dedicate weekend mornings to full-length timed tests.\n• **Admissions Safety**: Track official notification schedules on state counseling and national test agency portals.`,
-                  followUps: [
-                    'What are the official registration dates?',
-                    'What are the safe cutoffs for premier Tier 1 colleges?'
-                  ],
+                  content: fallbackTopic,
+                  followUps: fallbackFollowUps,
                   isStreaming: false,
                 }
               : m
@@ -542,7 +562,7 @@ export const AskPathfinderDrawer: React.FC<AskPathfinderDrawerProps> = ({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-label="Guidley Advisor">
+        <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-label="Guidely Advisor">
           {/* Backdrop overlay */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -569,7 +589,7 @@ export const AskPathfinderDrawer: React.FC<AskPathfinderDrawerProps> = ({
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="font-display font-bold text-lg text-[var(--text-primary)]">
-                      Guidley Advisor
+                      Guidely Advisor
                     </h3>
                     <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#faefe4] dark:bg-[#34271e] text-[#b85d24] border border-[#ebd6c3]">
                       <Zap className="w-2.5 h-2.5 stroke-[2.5]" /> Fast AI
@@ -602,7 +622,7 @@ export const AskPathfinderDrawer: React.FC<AskPathfinderDrawerProps> = ({
                 <button
                   onClick={onClose}
                   className="p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[#f4ebe0] dark:hover:bg-[#28231f] transition-colors cursor-pointer"
-                  aria-label="Close Guidley Advisor"
+                  aria-label="Close Guidely Advisor"
                 >
                   <X className="w-5 h-5" />
                 </button>
