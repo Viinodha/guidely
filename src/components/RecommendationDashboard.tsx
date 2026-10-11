@@ -37,6 +37,7 @@ import { CareerPath } from '../data/careerDatabase';
 import { StudentProfile, RecommendationRationale, RecommendationMap } from '../types/student';
 import { calculateCareerMatches, ScoredCareer } from '../utils/recommendationEngine';
 import { CollegePlacementHub } from './CollegePlacementHub';
+import { CareerComparisonChart, SingleCareerMiniVisualizer } from './CareerComparisonChart';
 
 interface RecommendationDashboardProps {
   profile: StudentProfile;
@@ -321,6 +322,16 @@ export const RecommendationDashboard: React.FC<RecommendationDashboardProps> = (
           />
         </section>
       )}
+
+      {/* RECHARTS RADAR & BAR COMPARISON: INTERACTIVE MATCH EXPLAINABILITY */}
+      <CareerComparisonChart
+        scoredCareers={scoredMatches}
+        studentName={profile.studentName}
+        onSelectCareer={(career) => {
+          setExpandedCareerId(career.id);
+          setActiveTabByCareer((prev) => ({ ...prev, [career.id]: 'rationale' }));
+        }}
+      />
 
       {/* FILTER & SEARCH BAR */}
       <section className="space-y-5">
@@ -636,6 +647,9 @@ export const RecommendationDashboard: React.FC<RecommendationDashboardProps> = (
                                 {activeRationale.scoreExplanation || scoreBreakdown.scoreExplanation}
                               </p>
                             </div>
+
+                            {/* RECHARTS RADAR MINI-VISUALIZER: INTEREST VS SKILLS VS DEMAND */}
+                            <SingleCareerMiniVisualizer scoredCareer={scored} />
 
                             {/* 5-Factor Score Cards with Progress Indicators */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

@@ -6,12 +6,20 @@
 import { CareerPath, CAREER_DATABASE, CollegeRoadmap, RoadmapMilestone } from '../data/careerDatabase';
 import { StudentProfile, RecommendationRationale, ExplainableScoreBreakdown, PlacementResourceKit, HigherEducationKit } from '../types/student';
 
+export interface CareerComparisonMetrics {
+  interestScore: number; // 0-100
+  skillAlignment: number; // 0-100
+  demand: number; // 0-100
+  overallMatch: number; // 0-100
+}
+
 export interface ScoredCareer {
   career: CareerPath;
   score: number;
   isEligible: boolean;
   scoreBreakdown: ExplainableScoreBreakdown;
   rationale: RecommendationRationale;
+  comparisonMetrics: CareerComparisonMetrics;
 }
 
 /**
@@ -433,12 +441,33 @@ export function calculateCareerMatches(profile: StudentProfile): ScoredCareer[] 
 
     const rationale = buildDeterministicRationale(career, profile, finalScore, isEligible, scoreBreakdown);
 
+    // Compute normalized 0-100 visual comparison metrics
+    const interestScore = Math.min(
+      100,
+      Math.max(25, Math.round(scoreBreakdown.subjectMatch.percentage * 0.65 + scoreBreakdown.workStyle.percentage * 0.35))
+    );
+    const skillAlignment = isEligible
+      ? Math.min(
+          100,
+          Math.max(35, Math.round(scoreBreakdown.streamMatch.percentage * 0.70 + scoreBreakdown.academicPerformance.percentage * 0.30))
+        )
+      : Math.min(30, Math.round(scoreBreakdown.academicPerformance.percentage * 0.30));
+    const demand = career.futureDemandScore;
+
+    const comparisonMetrics: CareerComparisonMetrics = {
+      interestScore,
+      skillAlignment,
+      demand,
+      overallMatch: finalScore,
+    };
+
     return {
       career,
       score: finalScore,
       isEligible,
       scoreBreakdown,
       rationale,
+      comparisonMetrics,
     };
   });
 

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Bookmark, 
   Trash2, 
@@ -15,10 +15,28 @@ import {
   BookOpen, 
   Building2, 
   Sparkles,
-  Award
+  Award,
+  Compass,
+  BarChart3
 } from 'lucide-react';
+import {
+  ResponsiveContainer,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Radar,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+} from 'recharts';
 import { CAREER_DATABASE, CareerPath } from '../data/careerDatabase';
 import { StudentProfile } from '../types/student';
+import { calculateCareerMatches } from '../utils/recommendationEngine';
 
 interface BookmarksCompareProps {
   profile: StudentProfile;
@@ -46,6 +64,41 @@ export const BookmarksCompare: React.FC<BookmarksCompareProps> = ({
 
   const careerA = CAREER_DATABASE.find((c) => c.id === compareIdA) || CAREER_DATABASE[0];
   const careerB = CAREER_DATABASE.find((c) => c.id === compareIdB) || CAREER_DATABASE[1];
+
+  const allScored = useMemo(() => calculateCareerMatches(profile), [profile]);
+  const scoredA = allScored.find((s) => s.career.id === compareIdA) || allScored[0];
+  const scoredB = allScored.find((s) => s.career.id === compareIdB) || allScored[1];
+  const [chartMode, setChartMode] = useState<'radar' | 'bar'>('radar');
+
+  const radarCompareData = useMemo(() => [
+    { metric: 'Interest Score', [careerA.id]: scoredA?.comparisonMetrics?.interestScore ?? 75, [careerB.id]: scoredB?.comparisonMetrics?.interestScore ?? 75, fullMark: 100 },
+    { metric: 'Skill Alignment', [careerA.id]: scoredA?.comparisonMetrics?.skillAlignment ?? 80, [careerB.id]: scoredB?.comparisonMetrics?.skillAlignment ?? 80, fullMark: 100 },
+    { metric: 'Demand', [careerA.id]: scoredA?.comparisonMetrics?.demand ?? 85, [careerB.id]: scoredB?.comparisonMetrics?.demand ?? 85, fullMark: 100 },
+    { metric: 'AI Match Fit', [careerA.id]: scoredA?.score ?? 80, [careerB.id]: scoredB?.score ?? 80, fullMark: 100 },
+  ], [careerA.id, careerB.id, scoredA, scoredB]);
+
+  const barCompareData = useMemo(() => [
+    {
+      metric: 'Interest Score',
+      [careerA.title]: scoredA?.comparisonMetrics?.interestScore ?? 75,
+      [careerB.title]: scoredB?.comparisonMetrics?.interestScore ?? 75,
+    },
+    {
+      metric: 'Skill Alignment',
+      [careerA.title]: scoredA?.comparisonMetrics?.skillAlignment ?? 80,
+      [careerB.title]: scoredB?.comparisonMetrics?.skillAlignment ?? 80,
+    },
+    {
+      metric: 'Demand',
+      [careerA.title]: scoredA?.comparisonMetrics?.demand ?? 85,
+      [careerB.title]: scoredB?.comparisonMetrics?.demand ?? 85,
+    },
+    {
+      metric: 'AI Match Fit',
+      [careerA.title]: scoredA?.score ?? 80,
+      [careerB.title]: scoredB?.score ?? 80,
+    },
+  ], [careerA.title, careerB.title, scoredA, scoredB]);
 
   return (
     <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10 py-12 space-y-12">
@@ -182,6 +235,150 @@ export const BookmarksCompare: React.FC<BookmarksCompareProps> = ({
                 </option>
               ))}
             </select>
+          </div>
+        </div>
+
+        {/* VISUAL RECHARTS COMPARISON: INTEREST VS SKILLS VS DEMAND */}
+        <div className="p-6 rounded-2xl bg-[#faf7f2] dark:bg-[#1c1815] border border-[var(--border-subtle)] space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--border-subtle)] pb-3">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-[#c76f3b]" />
+              <h3 className="text-xs font-bold text-[var(--text-primary)]">
+                Visual Fit Radar & Metric Comparison
+              </h3>
+            </div>
+            
+            <div className="inline-flex rounded-xl bg-[var(--bg-card)] p-1 border border-[var(--border-subtle)]">
+              <button
+                onClick={() => setChartMode('radar')}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                  chartMode === 'radar'
+                    ? 'bg-[#c76f3b] text-white shadow-xs'
+                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                }`}
+              >
+                <Compass className="w-3.5 h-3.5" />
+                <span>Radar Analysis</span>
+              </button>
+              <button
+                onClick={() => setChartMode('bar')}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                  chartMode === 'bar'
+                    ? 'bg-[#c76f3b] text-white shadow-xs'
+                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                }`}
+              >
+                <BarChart3 className="w-3.5 h-3.5" />
+                <span>Side-by-Side Bars</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+            {/* Chart Area */}
+            <div className="lg:col-span-7 bg-[var(--bg-card)] rounded-xl p-4 border border-[var(--border-subtle)] h-[280px]">
+              <ResponsiveContainer width="100%" height="100%">
+                {chartMode === 'radar' ? (
+                  <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarCompareData}>
+                    <PolarGrid stroke="var(--border-subtle)" strokeDasharray="3 3" />
+                    <PolarAngleAxis
+                      dataKey="metric"
+                      tick={{ fill: 'var(--text-primary)', fontSize: 10, fontWeight: 600 }}
+                    />
+                    <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: 'var(--text-muted)', fontSize: 8 }} />
+                    <Radar
+                      name={`${careerA.title} (${scoredA?.score}%)`}
+                      dataKey={careerA.id}
+                      stroke="#c76f3b"
+                      fill="#c76f3b"
+                      fillOpacity={0.35}
+                      strokeWidth={2}
+                    />
+                    <Radar
+                      name={`${careerB.title} (${scoredB?.score}%)`}
+                      dataKey={careerB.id}
+                      stroke="#2563eb"
+                      fill="#2563eb"
+                      fillOpacity={0.25}
+                      strokeWidth={2}
+                    />
+                    <Legend wrapperStyle={{ paddingTop: '8px', fontSize: '11px', color: 'var(--text-secondary)' }} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'var(--bg-card)',
+                        borderColor: 'var(--border-subtle)',
+                        borderRadius: '0.75rem',
+                        fontSize: '11px',
+                        color: 'var(--text-primary)',
+                      }}
+                    />
+                  </RadarChart>
+                ) : (
+                  <BarChart data={barCompareData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" vertical={false} />
+                    <XAxis dataKey="metric" tick={{ fill: 'var(--text-primary)', fontSize: 10 }} />
+                    <YAxis domain={[0, 100]} tick={{ fill: 'var(--text-muted)', fontSize: 10 }} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'var(--bg-card)',
+                        borderColor: 'var(--border-subtle)',
+                        borderRadius: '0.75rem',
+                        fontSize: '11px',
+                        color: 'var(--text-primary)',
+                      }}
+                    />
+                    <Legend wrapperStyle={{ paddingTop: '6px', fontSize: '11px', color: 'var(--text-secondary)' }} />
+                    <Bar dataKey={careerA.title} fill="#c76f3b" radius={[4, 4, 0, 0]} maxBarSize={32} />
+                    <Bar dataKey={careerB.title} fill="#2563eb" radius={[4, 4, 0, 0]} maxBarSize={32} />
+                  </BarChart>
+                )}
+              </ResponsiveContainer>
+            </div>
+
+            {/* Quick Metrics Summary */}
+            <div className="lg:col-span-5 space-y-3">
+              <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-[#c76f3b] truncate max-w-[180px]">{careerA.title}</span>
+                  <span className="font-bold text-[#c76f3b]">{scoredA?.score}% Fit</span>
+                </div>
+                <div className="grid grid-cols-3 gap-2 text-[10px] text-center pt-1">
+                  <div className="p-1.5 rounded-lg bg-[#faf7f2] dark:bg-[#1a1714]">
+                    <span className="text-[var(--text-muted)] block">Interest</span>
+                    <span className="font-bold text-[var(--text-primary)]">{scoredA?.comparisonMetrics.interestScore}%</span>
+                  </div>
+                  <div className="p-1.5 rounded-lg bg-[#faf7f2] dark:bg-[#1a1714]">
+                    <span className="text-[var(--text-muted)] block">Skills</span>
+                    <span className="font-bold text-[var(--text-primary)]">{scoredA?.comparisonMetrics.skillAlignment}%</span>
+                  </div>
+                  <div className="p-1.5 rounded-lg bg-[#faf7f2] dark:bg-[#1a1714]">
+                    <span className="text-[var(--text-muted)] block">Demand</span>
+                    <span className="font-bold text-[var(--text-primary)]">{scoredA?.comparisonMetrics.demand}/100</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-[#2563eb] truncate max-w-[180px]">{careerB.title}</span>
+                  <span className="font-bold text-[#2563eb]">{scoredB?.score}% Fit</span>
+                </div>
+                <div className="grid grid-cols-3 gap-2 text-[10px] text-center pt-1">
+                  <div className="p-1.5 rounded-lg bg-[#faf7f2] dark:bg-[#1a1714]">
+                    <span className="text-[var(--text-muted)] block">Interest</span>
+                    <span className="font-bold text-[var(--text-primary)]">{scoredB?.comparisonMetrics.interestScore}%</span>
+                  </div>
+                  <div className="p-1.5 rounded-lg bg-[#faf7f2] dark:bg-[#1a1714]">
+                    <span className="text-[var(--text-muted)] block">Skills</span>
+                    <span className="font-bold text-[var(--text-primary)]">{scoredB?.comparisonMetrics.skillAlignment}%</span>
+                  </div>
+                  <div className="p-1.5 rounded-lg bg-[#faf7f2] dark:bg-[#1a1714]">
+                    <span className="text-[var(--text-muted)] block">Demand</span>
+                    <span className="font-bold text-[var(--text-primary)]">{scoredB?.comparisonMetrics.demand}/100</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
